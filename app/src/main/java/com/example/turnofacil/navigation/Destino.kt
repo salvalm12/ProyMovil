@@ -8,7 +8,11 @@ import com.example.turnofacil.R
 sealed class Destino(val ruta: String) {
     data object Inicio : Destino("inicio")
     data object Servicios : Destino("servicios")
-    data object Agendar : Destino("agendar")
+    data object Agendar : Destino("agendar?servicioId={servicioId}") {
+        const val ARG_SERVICIO_ID = "servicioId"
+        fun crearRuta(servicioId: String? = null): String =
+            if (servicioId.isNullOrEmpty()) "agendar" else "agendar?servicioId=$servicioId"
+    }
     data object Agenda : Destino("agenda")
     data object AdminServicios : Destino("admin_servicios")
     data object Configuracion : Destino("configuracion")

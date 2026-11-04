@@ -39,6 +39,7 @@
     <string name="servicios_agendar">Agendar cita</string>
     <string name="servicios_admin">Administrar servicios</string>
     <string name="servicios_vacio">Aún no hay servicios registrados</string>
+    <string name="servicios_error_cargar">Error al cargar la lista de servicios</string>
     <string name="servicios_duracion">%1$d min</string>
     <string name="precio_formato">$%1$s</string>
 
@@ -47,12 +48,17 @@
     <string name="agendar_servicio">Servicio</string>
     <string name="agendar_seleccionar_servicio">Seleccionar servicio</string>
     <string name="agendar_nombre">Nombre del cliente</string>
+    <string name="agendar_error_nombre">Por favor ingresa el nombre del cliente</string>
     <string name="agendar_tipo_atencion">Tipo de atención</string>
     <string name="agendar_tipo_local">En el local</string>
     <string name="agendar_tipo_domicilio">A domicilio</string>
     <string name="agendar_adicionales">Servicios adicionales</string>
     <string name="agendar_hora">Hora</string>
     <string name="agendar_seleccionar_hora">Seleccionar hora</string>
+    <string name="agendar_horario_atencion">Horario de atención: %1$s a %2$s</string>
+    <string name="agendar_error_fuera_horario">La hora seleccionada está fuera del horario de atención</string>
+    <string name="agendar_error_horario_ocupado">El horario seleccionado ya no está disponible</string>
+    <string name="agendar_total">Total a pagar:</string>
     <string name="agendar_confirmar">Confirmar cita</string>
 
     <!-- Estados de la cita -->

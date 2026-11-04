@@ -5,12 +5,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -19,7 +24,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.turnofacil.data.demo.DatosDemo
 import com.example.turnofacil.navigation.Destino
 import com.example.turnofacil.navigation.DestinoPrincipal
 import com.example.turnofacil.ui.admin.ServiceAdminScreen
@@ -31,6 +35,12 @@ import com.example.turnofacil.ui.screens.InicioScreen
 import com.example.turnofacil.ui.screens.ServiciosScreen
 import com.example.turnofacil.ui.settings.SettingsScreen
 import com.example.turnofacil.ui.theme.TurnoFacilTheme
+import com.example.turnofacil.ui.viewmodel.AgendarCitaViewModel
+import com.example.turnofacil.ui.viewmodel.CitaRepositorio
+import com.example.turnofacil.ui.viewmodel.CitaRepositorioDemo
+import com.example.turnofacil.ui.viewmodel.ServicioRepositorio
+import com.example.turnofacil.ui.viewmodel.ServicioRepositorioDemo
+import com.example.turnofacil.ui.viewmodel.ServiciosViewModel
 
 /**
  * Contenedor principal de la aplicación. Define el menú de navegación adaptable
@@ -44,8 +54,20 @@ fun TurnoFacilApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destinoActual = backStackEntry?.destination
 
+    val servicioRepositorio: ServicioRepositorio = remember { ServicioRepositorioDemo() }
+    val citaRepositorio: CitaRepositorio = remember { CitaRepositorioDemo() }
+
+    val serviciosViewModel: ServiciosViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                ServiciosViewModel(servicioRepositorio)
+            }
+        }
+    )
+
     val navegarPrincipal: (Destino) -> Unit = { destino ->
-        navController.navigate(destino.ruta) {
+        val ruta = if (destino is Destino.Agendar) Destino.Agendar.crearRuta() else destino.ruta
+        navController.navigate(ruta) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
             launchSingleTop = true
             restoreState = true
@@ -92,17 +114,53 @@ fun TurnoFacilApp() {
             }
 
             composable(Destino.Servicios.ruta) {
+                val serviciosUiState by serviciosViewModel.uiState.collectAsStateWithLifecycle()
                 ServiciosScreen(
-                    servicios = DatosDemo.servicios,
-                    onAgendar = { navegarPrincipal(Destino.Agendar) },
+                    uiState = serviciosUiState,
+                    onAgendar = { servicioId ->
+                        navController.navigate(Destino.Agendar.crearRuta(servicioId))
+                    },
                     onAdminServicios = { navController.navigate(Destino.AdminServicios.ruta) },
                 )
             }
 
-            composable(Destino.Agendar.ruta) {
+            composable(
+                route = Destino.Agendar.ruta,
+                arguments = listOf(
+                    navArgument(Destino.Agendar.ARG_SERVICIO_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                ),
+            ) { entry ->
+                val servicioId = entry.arguments?.getString(Destino.Agendar.ARG_SERVICIO_ID)
+                val agendarCitaViewModel: AgendarCitaViewModel = viewModel(
+                    key = "AgendarCitaViewModel_$servicioId",
+                    factory = viewModelFactory {
+                        initializer {
+                            AgendarCitaViewModel(
+                                servicioRepositorio = servicioRepositorio,
+                                citaRepositorio = citaRepositorio,
+                                servicioIdInicial = servicioId,
+                            )
+                        }
+                    }
+                )
+                val agendarUiState by agendarCitaViewModel.uiState.collectAsStateWithLifecycle()
+                LaunchedEffect(agendarUiState.guardadoExitoso) {
+                    if (agendarUiState.guardadoExitoso) {
+                        navegarPrincipal(Destino.Agenda)
+                    }
+                }
                 AgendarCitaScreen(
-                    servicios = DatosDemo.servicios,
-                    onConfirmar = { navegarPrincipal(Destino.Agenda) },
+                    uiState = agendarUiState,
+                    onNombreChange = agendarCitaViewModel::onNombreChange,
+                    onServicioChange = agendarCitaViewModel::onServicioChange,
+                    onTipoAtencionChange = agendarCitaViewModel::onTipoAtencionChange,
+                    onAdicionalToggle = agendarCitaViewModel::onAdicionalToggle,
+                    onHoraChange = agendarCitaViewModel::onHoraChange,
+                    onConfirmar = agendarCitaViewModel::enviar,
                 )
             }
 
