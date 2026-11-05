@@ -7,22 +7,36 @@ import com.example.turnofacil.data.model.Servicio
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 /**
  * Implementación en memoria de [ServiceRepository] utilizando [MutableStateFlow].
  */
 class FakeServiceRepository : ServiceRepository {
     private val _servicios = MutableStateFlow<List<Servicio>>(DatosDemo.servicios)
+    private val _adicionales = MutableStateFlow<List<Adicional>>(
+        DatosDemo.adicionales.mapIndexed { idx, item ->
+            Adicional(id = (idx + 1).toString(), nombre = item.nombre, precio = item.precio)
+        }
+    )
 
     override fun getServicios(): Flow<List<Servicio>> = _servicios.asStateFlow()
+
+    override fun getServiciosActivos(): Flow<List<Servicio>> {
+        return _servicios.map { lista -> lista.filter { it.activo } }
+    }
 
     override suspend fun getServicioPorId(id: String): Servicio? {
         return _servicios.value.firstOrNull { it.id == id }
     }
 
-    override suspend fun agregarServicio(servicio: Servicio) {
-        _servicios.value = _servicios.value + servicio
+    override suspend fun agregarServicio(servicio: Servicio): String {
+        val nuevoId = servicio.id.ifBlank { UUID.randomUUID().toString() }
+        val nuevo = servicio.copy(id = nuevoId)
+        _servicios.value = _servicios.value + nuevo
+        return nuevoId
     }
 
     override suspend fun actualizarServicio(servicio: Servicio) {
@@ -33,12 +47,13 @@ class FakeServiceRepository : ServiceRepository {
 
     override suspend fun eliminarServicio(id: String): Boolean {
         val servicioExistente = getServicioPorId(id) ?: return false
-        // Soft delete / baja lógica:
         _servicios.value = _servicios.value.map {
             if (it.id == id) it.copy(activo = false) else it
         }
         return true
     }
+
+    override fun getAdicionales(): Flow<List<Adicional>> = _adicionales.asStateFlow()
 }
 
 /**
@@ -63,6 +78,49 @@ class FakeAppointmentRepository(
         return _citas.value.firstOrNull { it.id == id }
     }
 
+    override fun observarCitaPorId(id: String): Flow<Cita?> {
+        return _citas.map { lista -> lista.firstOrNull { it.id == id } }
+    }
+
+    override suspend fun agendarCita(solicitud: SolicitudAgendarCita): ResultadoAgendar {
+        if (esHorarioOcupado(solicitud.fecha, solicitud.hora)) {
+            return ResultadoAgendar.HorarioOcupado
+        }
+        val nuevaCita = Cita(
+            id = UUID.randomUUID().toString(),
+            cliente = solicitud.cliente,
+            servicioId = solicitud.servicioId,
+            tipoAtencion = solicitud.tipoAtencion,
+            adicionales = solicitud.adicionales,
+            hora = solicitud.hora,
+            fecha = solicitud.fecha,
+            estado = EstadoCita.PENDIENTE,
+            nota = solicitud.nota,
+        )
+        _citas.value = _citas.value + nuevaCita
+        return ResultadoAgendar.Exito
+    }
+
+    override suspend fun agregarCita(cita: Cita): ResultadoAgendar {
+        if (esHorarioOcupado(cita.fecha, cita.hora)) {
+            return ResultadoAgendar.HorarioOcupado
+        }
+        val nuevaCita = cita.copy(
+            id = cita.id.ifBlank { UUID.randomUUID().toString() },
+            estado = EstadoCita.PENDIENTE,
+        )
+        _citas.value = _citas.value + nuevaCita
+        return ResultadoAgendar.Exito
+    }
+
+    override suspend fun confirmarCita(id: String): Boolean {
+        return cambiarEstadoCita(id, EstadoCita.CONFIRMADA)
+    }
+
+    override suspend fun cancelarCita(id: String): Boolean {
+        return cambiarEstadoCita(id, EstadoCita.CANCELADA)
+    }
+
     override suspend fun cambiarEstadoCita(id: String, nuevoEstado: EstadoCita): Boolean {
         var actualizado = false
         _citas.value = _citas.value.map { cita ->
@@ -80,19 +138,18 @@ class FakeAppointmentRepository(
         id: String,
         nuevaFecha: String,
         nuevaHora: String,
-    ): Result<Unit> {
-        val citaActual = getCitaPorId(id) ?: return Result.failure(Exception("Cita no encontrada"))
+    ): ResultadoAgendar {
+        val citaActual = getCitaPorId(id) ?: return ResultadoAgendar.Error("Cita no encontrada")
 
-        // Regla 1: Una cita ocupa un horario (fecha + hora). Dos citas Pendientes o Confirmadas no pueden compartirlo.
-        val horarioOcupado = _citas.value.any { otra ->
+        val ocupado = _citas.value.any { otra ->
             otra.id != id &&
                     otra.fecha.equals(nuevaFecha, ignoreCase = true) &&
                     otra.hora == nuevaHora &&
                     (otra.estado == EstadoCita.PENDIENTE || otra.estado == EstadoCita.CONFIRMADA)
         }
 
-        if (horarioOcupado) {
-            return Result.failure(Exception("El horario $nuevaHora en la fecha $nuevaFecha ya está ocupado por otra cita activa."))
+        if (ocupado) {
+            return ResultadoAgendar.HorarioOcupado
         }
 
         _citas.value = _citas.value.map { cita ->
@@ -102,24 +159,15 @@ class FakeAppointmentRepository(
                 cita
             }
         }
-        return Result.success(Unit)
+        return ResultadoAgendar.Exito
     }
 
-    override suspend fun agregarCita(cita: Cita): Result<Unit> {
-        // Regla 1: Validar colisión de horarios
-        val horarioOcupado = _citas.value.any { otra ->
-            otra.fecha.equals(cita.fecha, ignoreCase = true) &&
-                    otra.hora == cita.hora &&
-                    (otra.estado == EstadoCita.PENDIENTE || otra.estado == EstadoCita.CONFIRMADA)
+    override suspend fun esHorarioOcupado(fecha: String, hora: String): Boolean {
+        return _citas.value.any { cita ->
+            cita.fecha.equals(fecha, ignoreCase = true) &&
+                    cita.hora == hora &&
+                    (cita.estado == EstadoCita.PENDIENTE || cita.estado == EstadoCita.CONFIRMADA)
         }
-        if (horarioOcupado) {
-            return Result.failure(Exception("Horario ocupado"))
-        }
-
-        // Regla 2: Una cita nueva siempre nace Pendiente
-        val nuevaCita = cita.copy(estado = EstadoCita.PENDIENTE)
-        _citas.value = _citas.value + nuevaCita
-        return Result.success(Unit)
     }
 
     override fun tieneCitasAsociadasAServicio(servicioId: String): Boolean {
