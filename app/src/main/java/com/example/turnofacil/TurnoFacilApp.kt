@@ -29,13 +29,14 @@ import androidx.navigation.navArgument
 import com.example.turnofacil.data.repository.RoomSeeder
 import com.example.turnofacil.navigation.Destino
 import com.example.turnofacil.navigation.DestinoPrincipal
-import com.example.turnofacil.ui.screens.AdminServiciosScreen
-import com.example.turnofacil.ui.screens.AgendaDelDiaScreen
+import com.example.turnofacil.ui.admin.ServiceAdminScreen
+import com.example.turnofacil.ui.agenda.AgendaScreen
+import com.example.turnofacil.ui.detail.DetailScreen
+import com.example.turnofacil.ui.detail.DetailViewModel
 import com.example.turnofacil.ui.screens.AgendarCitaScreen
-import com.example.turnofacil.ui.screens.ConfiguracionScreen
-import com.example.turnofacil.ui.screens.DetalleCitaScreen
 import com.example.turnofacil.ui.screens.InicioScreen
 import com.example.turnofacil.ui.screens.ServiciosScreen
+import com.example.turnofacil.ui.settings.SettingsScreen
 import com.example.turnofacil.ui.theme.TurnoFacilTheme
 import com.example.turnofacil.ui.viewmodel.AgendarCitaViewModel
 import com.example.turnofacil.ui.viewmodel.CitaRepositorio
@@ -124,8 +125,6 @@ private fun TurnoFacilAppContent(
                         )
                     },
                     label = {
-                        // Etiqueta de una sola línea para que palabras largas
-                        // como "Configuración" no se partan en la barra inferior.
                         Text(
                             text = stringResource(principal.etiqueta),
                             style = MaterialTheme.typography.labelSmall,
@@ -206,6 +205,7 @@ private fun TurnoFacilAppContent(
                 AgendaDelDiaScreen(
                     citas = citas,
                     servicios = serviciosUiState.servicios,
+                AgendaScreen(
                     onVerDetalle = { citaId ->
                         navController.navigate(Destino.DetalleCita.crearRuta(citaId))
                     },
@@ -221,7 +221,7 @@ private fun TurnoFacilAppContent(
             composable(
                 route = Destino.DetalleCita.ruta,
                 arguments = listOf(
-                    navArgument(Destino.DetalleCita.ARG_CITA_ID) { type = NavType.StringType }
+                    navArgument(Destino.DetalleCita.ARG_CITA_ID) { type = NavType.StringType },
                 ),
             ) { entry ->
                 val citaId = entry.arguments?.getString(Destino.DetalleCita.ARG_CITA_ID)
@@ -253,6 +253,12 @@ private fun TurnoFacilAppContent(
                             }
                         }
                     },
+                val citaId = entry.arguments?.getString(Destino.DetalleCita.ARG_CITA_ID) ?: ""
+                val viewModel = remember(citaId) { DetailViewModel(citaId = citaId) }
+                DetailScreen(
+                    viewModel = viewModel,
+                    onVolver = { navController.popBackStack() },
+                    onReprogramarExterna = { navController.navigate(Destino.Agendar.ruta) },
                 )
             }
 
@@ -271,10 +277,11 @@ private fun TurnoFacilAppContent(
                     },
                     onVolver = { navController.popBackStack() },
                 )
+                ServiceAdminScreen(onVolver = { navController.popBackStack() })
             }
 
             composable(Destino.Configuracion.ruta) {
-                ConfiguracionScreen()
+                SettingsScreen()
             }
         }
     }

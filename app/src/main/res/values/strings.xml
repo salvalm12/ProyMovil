@@ -61,30 +61,57 @@
     <string name="agendar_total">Total a pagar:</string>
     <string name="agendar_confirmar">Confirmar cita</string>
 
-    <!-- Agenda del día -->
-    <string name="agenda_titulo">Agenda del día</string>
-    <string name="agenda_subtitulo">Turnos programados para hoy</string>
-    <string name="agenda_vacia">No hay citas agendadas para hoy</string>
-    <string name="agenda_ver_detalle">Ver detalle</string>
-
     <!-- Estados de la cita -->
     <string name="estado_pendiente">Pendiente</string>
     <string name="estado_confirmada">Confirmada</string>
     <string name="estado_cancelada">Cancelada</string>
 
-    <!-- Detalle de cita -->
-    <string name="detalle_titulo">Detalle de la cita</string>
-    <string name="detalle_cliente">Cliente</string>
-    <string name="detalle_servicio">Servicio</string>
-    <string name="detalle_tipo_atencion">Tipo de atención</string>
-    <string name="detalle_adicionales">Adicionales</string>
-    <string name="detalle_hora">Hora</string>
-    <string name="detalle_estado">Estado</string>
-    <string name="detalle_nota">Nota</string>
-    <string name="detalle_reprogramar">Reprogramar</string>
-    <string name="detalle_no_encontrada">No se encontró la cita</string>
+    <!-- ==================================================================== -->
+    <!-- INTEGRANTE 4: REQUERIMIENTOS ASIGNADOS (agenda_, detail_, admin_, settings_) -->
+    <!-- ==================================================================== -->
 
-    <!-- Administración de servicios -->
+    <!-- Agenda del día (prefijo agenda_) -->
+    <string name="agenda_titulo">Agenda del día</string>
+    <string name="agenda_subtitulo">Turnos programados para hoy</string>
+    <string name="agenda_vacia">No hay citas agendadas para esta fecha</string>
+    <string name="agenda_ver_detalle">Ver detalle</string>
+    <string name="agenda_filtro_fecha">Fecha:</string>
+    <string name="agenda_filtro_estado">Estado:</string>
+    <string name="agenda_filtro_todos">Todos</string>
+    <string name="agenda_filtro_pendiente">Pendiente</string>
+    <string name="agenda_filtro_confirmada">Confirmada</string>
+    <string name="agenda_filtro_cancelada">Cancelada</string>
+    <string name="agenda_sync_conectado">Conectado — Datos sincronizados</string>
+    <string name="agenda_sync_pendiente">Sin conexión — Cambios pendientes por sincronizar</string>
+    <string name="agenda_accion_confirmar">Confirmar</string>
+    <string name="agenda_accion_cancelar">Cancelar</string>
+    <string name="agenda_hoy">Hoy</string>
+
+    <!-- Detalle de cita (prefijo detail_) -->
+    <string name="detail_titulo">Detalle de la cita</string>
+    <string name="detail_cliente">Cliente</string>
+    <string name="detail_servicio">Servicio</string>
+    <string name="detail_tipo_atencion">Tipo de atención</string>
+    <string name="detail_adicionales">Servicios adicionales</string>
+    <string name="detail_fecha_hora">Fecha y hora</string>
+    <string name="detail_estado">Estado de la cita</string>
+    <string name="detail_nota">Nota / Observaciones</string>
+    <string name="detail_precio_base">Precio servicio base</string>
+    <string name="detail_precio_adicionales">Precio adicionales</string>
+    <string name="detail_precio_total">Total a pagar</string>
+    <string name="detail_confirmar">Confirmar Cita</string>
+    <string name="detail_reprogramar">Reprogramar Cita</string>
+    <string name="detail_cancelar">Cancelar Cita</string>
+    <string name="detail_no_encontrada">No se encontró la cita seleccionada</string>
+    <string name="detail_dialogo_reprogramar_titulo">Reprogramar Cita</string>
+    <string name="detail_nueva_fecha">Nueva fecha (ej. Hoy, Mañana)</string>
+    <string name="detail_nueva_hora">Nueva hora (HH:mm)</string>
+    <string name="detail_error_horario_ocupado">El horario ya se encuentra ocupado por otra cita activa.</string>
+    <string name="detail_exito_reprogramada">Cita reprogramada con éxito.</string>
+    <string name="detail_exito_confirmada">Cita confirmada con éxito.</string>
+    <string name="detail_exito_cancelada">Cita cancelada con éxito. Horario liberado.</string>
+
+    <!-- Administrar servicios (prefijo admin_) -->
     <string name="admin_titulo">Administración de servicios</string>
     <string name="admin_subtitulo">Alta, edición y baja de servicios</string>
     <string name="admin_nuevo_servicio">Nuevo servicio</string>
@@ -94,18 +121,34 @@
     <string name="admin_duracion">Duración (min)</string>
     <string name="admin_disponible">Disponible</string>
     <string name="admin_inactivo">Inactivo</string>
+    <string name="admin_eliminar_servicio">Eliminar servicio</string>
+    <string name="admin_nombre">Nombre del servicio</string>
+    <string name="admin_precio">Precio ($)</string>
+    <string name="admin_duracion">Duración (minutos)</string>
+    <string name="admin_disponible">Disponible / Activo</string>
+    <string name="admin_estado_activo">Activo</string>
+    <string name="admin_estado_inactivo">Inactivo (Baja lógica)</string>
+    <string name="admin_baja_logica_mensaje">Este servicio tiene citas asociadas. Se marcará como inactivo (baja lógica) para conservar el historial.</string>
+    <string name="admin_baja_logica_confirmacion">¿Deseas marcar este servicio como inactivo?</string>
+    <string name="admin_error_nombre_vacio">El nombre del servicio no puede estar vacío.</string>
+    <string name="admin_error_precio_invalido">Ingresa un precio válido mayor a 0.</string>
+    <string name="admin_error_duracion_invalida">Ingresa una duración válida mayor a 0 minutos.</string>
+    <string name="admin_sin_servicios">No hay servicios registrados.</string>
 
-    <!-- Configuración -->
-    <string name="config_titulo">Configuración</string>
-    <string name="config_idioma">Idioma</string>
-    <string name="config_idioma_sistema">Idioma del sistema</string>
-    <string name="config_idioma_es">Español</string>
-    <string name="config_idioma_en">Inglés</string>
-    <string name="config_horario">Horario de atención</string>
-    <string name="config_horario_apertura">Apertura</string>
-    <string name="config_horario_cierre">Cierre</string>
-    <string name="config_sincronizacion">Sincronización</string>
-    <string name="config_sync_activada">Sincronización automática</string>
-    <string name="config_sync_descripcion">Respalda las citas en la nube cuando haya conexión</string>
-    <string name="config_ultima_sincronizacion">Última sincronización: hoy, 9:30 a. m.</string>
+    <!-- Configuración (prefijo settings_) -->
+    <string name="settings_titulo">Configuración</string>
+    <string name="settings_idioma">Idioma de la aplicación</string>
+    <string name="settings_idioma_sistema">Predeterminado del sistema</string>
+    <string name="settings_idioma_es">Español</string>
+    <string name="settings_idioma_en">Inglés (English)</string>
+    <string name="settings_horario">Horario de atención del negocio</string>
+    <string name="settings_horario_apertura">Hora de apertura</string>
+    <string name="settings_horario_cierre">Hora de cierre</string>
+    <string name="settings_sincronizacion">Sincronización de datos</string>
+    <string name="settings_sync_activada">Sincronización automática</string>
+    <string name="settings_sync_descripcion">Respalda las citas en la nube cuando hay conexión HTTPS activa</string>
+    <string name="settings_ultima_sincronizacion">Última sincronización:</string>
+    <string name="settings_estado_conexion">Estado de conexión:</string>
+    <string name="settings_guardar_horario">Guardar horario</string>
+    <string name="settings_horario_guardado">Horario de atención actualizado correctamente.</string>
 </resources>

@@ -61,31 +61,58 @@
     <string name="agendar_total">Total to pay:</string>
     <string name="agendar_confirmar">Confirm appointment</string>
 
-    <!-- Daily schedule -->
-    <string name="agenda_titulo">Daily schedule</string>
-    <string name="agenda_subtitulo">Shifts booked for today</string>
-    <string name="agenda_vacia">There are no appointments for today</string>
-    <string name="agenda_ver_detalle">View detail</string>
-
     <!-- Appointment status -->
     <string name="estado_pendiente">Pending</string>
     <string name="estado_confirmada">Confirmed</string>
     <string name="estado_cancelada">Cancelled</string>
 
-    <!-- Appointment detail -->
-    <string name="detalle_titulo">Appointment detail</string>
-    <string name="detalle_cliente">Customer</string>
-    <string name="detalle_servicio">Service</string>
-    <string name="detalle_tipo_atencion">Attention type</string>
-    <string name="detalle_adicionales">Add-ons</string>
-    <string name="detalle_hora">Time</string>
-    <string name="detalle_estado">Status</string>
-    <string name="detalle_nota">Note</string>
-    <string name="detalle_reprogramar">Reschedule</string>
-    <string name="detalle_no_encontrada">Appointment not found</string>
+    <!-- ==================================================================== -->
+    <!-- MEMBER 4: ASSIGNED REQUIREMENTS (agenda_, detail_, admin_, settings_) -->
+    <!-- ==================================================================== -->
 
-    <!-- Service management -->
-    <string name="admin_titulo">Service management</string>
+    <!-- Daily schedule (prefix agenda_) -->
+    <string name="agenda_titulo">Daily Schedule</string>
+    <string name="agenda_subtitulo">Appointments scheduled for today</string>
+    <string name="agenda_vacia">No appointments scheduled for this date</string>
+    <string name="agenda_ver_detalle">View Detail</string>
+    <string name="agenda_filtro_fecha">Date:</string>
+    <string name="agenda_filtro_estado">Status:</string>
+    <string name="agenda_filtro_todos">All</string>
+    <string name="agenda_filtro_pendiente">Pending</string>
+    <string name="agenda_filtro_confirmada">Confirmed</string>
+    <string name="agenda_filtro_cancelada">Cancelled</string>
+    <string name="agenda_sync_conectado">Online — Data synchronized</string>
+    <string name="agenda_sync_pendiente">Offline — Changes pending synchronization</string>
+    <string name="agenda_accion_confirmar">Confirm</string>
+    <string name="agenda_accion_cancelar">Cancel</string>
+    <string name="agenda_hoy">Today</string>
+
+    <!-- Appointment detail (prefix detail_) -->
+    <string name="detail_titulo">Appointment Detail</string>
+    <string name="detail_cliente">Customer</string>
+    <string name="detail_servicio">Service</string>
+    <string name="detail_tipo_atencion">Attention Type</string>
+    <string name="detail_adicionales">Additional Services</string>
+    <string name="detail_fecha_hora">Date and Time</string>
+    <string name="detail_estado">Appointment Status</string>
+    <string name="detail_nota">Notes / Remarks</string>
+    <string name="detail_precio_base">Base Service Price</string>
+    <string name="detail_precio_adicionales">Add-ons Price</string>
+    <string name="detail_precio_total">Total to Pay</string>
+    <string name="detail_confirmar">Confirm Appointment</string>
+    <string name="detail_reprogramar">Reschedule Appointment</string>
+    <string name="detail_cancelar">Cancel Appointment</string>
+    <string name="detail_no_encontrada">The selected appointment was not found</string>
+    <string name="detail_dialogo_reprogramar_titulo">Reschedule Appointment</string>
+    <string name="detail_nueva_fecha">New Date (e.g. Today, Tomorrow)</string>
+    <string name="detail_nueva_hora">New Time (HH:mm)</string>
+    <string name="detail_error_horario_ocupado">The time slot is already occupied by another active appointment.</string>
+    <string name="detail_exito_reprogramada">Appointment rescheduled successfully.</string>
+    <string name="detail_exito_confirmada">Appointment confirmed successfully.</string>
+    <string name="detail_exito_cancelada">Appointment cancelled successfully. Time slot released.</string>
+
+    <!-- Service Management (prefix admin_) -->
+    <string name="admin_titulo">Service Management</string>
     <string name="admin_subtitulo">Create, edit and delete services</string>
     <string name="admin_nuevo_servicio">New service</string>
     <string name="admin_editar_servicio">Edit service</string>
@@ -94,18 +121,36 @@
     <string name="admin_duracion">Duration (min)</string>
     <string name="admin_disponible">Available</string>
     <string name="admin_inactivo">Inactive</string>
+    <string name="admin_nuevo_servicio">New Service</string>
+    <string name="admin_editar_servicio">Edit Service</string>
+    <string name="admin_eliminar_servicio">Delete Service</string>
+    <string name="admin_nombre">Service Name</string>
+    <string name="admin_precio">Price ($)</string>
+    <string name="admin_duracion">Duration (minutes)</string>
+    <string name="admin_disponible">Available / Active</string>
+    <string name="admin_estado_activo">Active</string>
+    <string name="admin_estado_inactivo">Inactive (Soft delete)</string>
+    <string name="admin_baja_logica_mensaje">This service has associated appointments. It will be marked as inactive (soft delete) to preserve history.</string>
+    <string name="admin_baja_logica_confirmacion">Do you want to mark this service as inactive?</string>
+    <string name="admin_error_nombre_vacio">Service name cannot be empty.</string>
+    <string name="admin_error_precio_invalido">Enter a valid price greater than 0.</string>
+    <string name="admin_error_duracion_invalida">Enter a valid duration greater than 0 minutes.</string>
+    <string name="admin_sin_servicios">No services registered.</string>
 
-    <!-- Settings -->
-    <string name="config_titulo">Settings</string>
-    <string name="config_idioma">Language</string>
-    <string name="config_idioma_sistema">System language</string>
-    <string name="config_idioma_es">Spanish</string>
-    <string name="config_idioma_en">English</string>
-    <string name="config_horario">Business hours</string>
-    <string name="config_horario_apertura">Opening</string>
-    <string name="config_horario_cierre">Closing</string>
-    <string name="config_sincronizacion">Sync</string>
-    <string name="config_sync_activada">Automatic sync</string>
-    <string name="config_sync_descripcion">Back up appointments to the cloud when online</string>
-    <string name="config_ultima_sincronizacion">Last sync: today, 9:30 AM</string>
+    <!-- Settings (prefix settings_) -->
+    <string name="settings_titulo">Settings</string>
+    <string name="settings_idioma">Application Language</string>
+    <string name="settings_idioma_sistema">System Default</string>
+    <string name="settings_idioma_es">Spanish</string>
+    <string name="settings_idioma_en">English</string>
+    <string name="settings_horario">Business Hours</string>
+    <string name="settings_horario_apertura">Opening Time</string>
+    <string name="settings_horario_cierre">Closing Time</string>
+    <string name="settings_sincronizacion">Data Synchronization</string>
+    <string name="settings_sync_activada">Automatic Sync</string>
+    <string name="settings_sync_descripcion">Back up appointments to the cloud when HTTPS connection is active</string>
+    <string name="settings_ultima_sincronizacion">Last synchronization:</string>
+    <string name="settings_estado_conexion">Connection status:</string>
+    <string name="settings_guardar_horario">Save Hours</string>
+    <string name="settings_horario_guardado">Business hours updated successfully.</string>
 </resources>
