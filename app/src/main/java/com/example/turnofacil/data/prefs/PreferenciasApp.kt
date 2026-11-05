@@ -3,15 +3,18 @@ package com.example.turnofacil.data.prefs
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.SharedPreferences
 import android.content.res.Configuration
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.util.Locale
 
 /**
- * Preferencias simples de la aplicación (por ahora el idioma).
+ * Preferencias globales de la aplicación (idioma, horario de atención y sincronización).
  *
- * El idioma se guarda como etiqueta: "sistema" | "es" | "en".
- * Se aplica envolviendo el Context de la Activity en [contextConIdioma]
- * (desde [MainActivity.attachBaseContext]) y llamando a `recreate()` al cambiarlo.
+ * Mantiene compatibilidad total con el selector de idioma existente y expone
+ * los valores configurables como [Flow] para la UI (Configuración, ViewModel).
  */
 object PreferenciasApp {
 
@@ -21,6 +24,12 @@ object PreferenciasApp {
 
     private const val PREFS = "turnofacil_prefs"
     private const val CLAVE_IDIOMA = "idioma"
+    private const val CLAVE_HORA_APERTURA = "hora_apertura"
+    private const val CLAVE_HORA_CIERRE = "hora_cierre"
+    private const val CLAVE_ULTIMA_SYNC = "ultima_sync"
+
+    const val DEFAULT_HORA_APERTURA = "09:00"
+    const val DEFAULT_HORA_CIERRE = "18:00"
 
     fun idioma(context: Context): String =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -31,6 +40,72 @@ object PreferenciasApp {
             .edit()
             .putString(CLAVE_IDIOMA, idioma)
             .apply()
+    }
+
+    /** Observa los cambios de idioma como Flow. */
+    fun observarIdioma(context: Context): Flow<String> = callbackFlow {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == CLAVE_IDIOMA) {
+                trySend(idioma(context))
+            }
+        }
+        trySend(idioma(context))
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    fun horaApertura(context: Context): String =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getString(CLAVE_HORA_APERTURA, DEFAULT_HORA_APERTURA) ?: DEFAULT_HORA_APERTURA
+
+    fun horaCierre(context: Context): String =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getString(CLAVE_HORA_CIERRE, DEFAULT_HORA_CIERRE) ?: DEFAULT_HORA_CIERRE
+
+    fun establecerHorarioAtencion(context: Context, apertura: String, cierre: String) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(CLAVE_HORA_APERTURA, apertura)
+            .putString(CLAVE_HORA_CIERRE, cierre)
+            .apply()
+    }
+
+    /** Observa el horario de atención (Apertura, Cierre) como Flow. */
+    fun observarHorarioAtencion(context: Context): Flow<Pair<String, String>> = callbackFlow {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == CLAVE_HORA_APERTURA || key == CLAVE_HORA_CIERRE) {
+                trySend(Pair(horaApertura(context), horaCierre(context)))
+            }
+        }
+        trySend(Pair(horaApertura(context), horaCierre(context)))
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    fun ultimaSincronizacion(context: Context): Long =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getLong(CLAVE_ULTIMA_SYNC, 0L)
+
+    fun establecerUltimaSincronizacion(context: Context, timestamp: Long) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putLong(CLAVE_ULTIMA_SYNC, timestamp)
+            .apply()
+    }
+
+    /** Observa el timestamp de la última sincronización exitosa como Flow. */
+    fun observarUltimaSincronizacion(context: Context): Flow<Long> = callbackFlow {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == CLAVE_ULTIMA_SYNC) {
+                trySend(ultimaSincronizacion(context))
+            }
+        }
+        trySend(ultimaSincronizacion(context))
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
     /** Devuelve un Context con el idioma guardado aplicado (o el original si es "sistema"). */
