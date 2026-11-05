@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.turnofacil.R
-import com.example.turnofacil.data.demo.DatosDemo
 import com.example.turnofacil.ui.components.BotonAccion
 import com.example.turnofacil.ui.components.EstadoConexion
 import com.example.turnofacil.ui.components.TarjetaResumen
@@ -28,6 +27,8 @@ import com.example.turnofacil.ui.components.TarjetaResumen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioScreen(
+    citasHoy: Int,
+    serviciosActivos: Int,
     onVerServicios: () -> Unit,
     onAgendar: () -> Unit,
     onVerAgenda: () -> Unit,
@@ -60,13 +61,13 @@ fun InicioScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 TarjetaResumen(
-                    valor = DatosDemo.citas.size.toString(),
+                    valor = citasHoy.toString(),
                     etiqueta = stringResource(R.string.inicio_citas_hoy),
                     icono = R.drawable.ic_event,
                     modifier = Modifier.weight(1f),
                 )
                 TarjetaResumen(
-                    valor = DatosDemo.servicios.size.toString(),
+                    valor = serviciosActivos.toString(),
                     etiqueta = stringResource(R.string.inicio_servicios_activos),
                     icono = R.drawable.ic_list,
                     modifier = Modifier.weight(1f),
