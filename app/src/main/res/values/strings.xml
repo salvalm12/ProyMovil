@@ -116,10 +116,6 @@
     <string name="admin_subtitulo">Alta, edición y baja de servicios</string>
     <string name="admin_nuevo_servicio">Nuevo servicio</string>
     <string name="admin_editar_servicio">Editar servicio</string>
-    <string name="admin_nombre">Nombre</string>
-    <string name="admin_precio">Precio</string>
-    <string name="admin_duracion">Duración (min)</string>
-    <string name="admin_disponible">Disponible</string>
     <string name="admin_inactivo">Inactivo</string>
     <string name="admin_eliminar_servicio">Eliminar servicio</string>
     <string name="admin_nombre">Nombre del servicio</string>

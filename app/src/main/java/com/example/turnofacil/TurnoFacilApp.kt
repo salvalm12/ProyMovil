@@ -202,18 +202,9 @@ private fun TurnoFacilAppContent(
             }
 
             composable(Destino.Agenda.ruta) {
-                AgendaDelDiaScreen(
-                    citas = citas,
-                    servicios = serviciosUiState.servicios,
                 AgendaScreen(
                     onVerDetalle = { citaId ->
                         navController.navigate(Destino.DetalleCita.crearRuta(citaId))
-                    },
-                    onConfirmar = { citaId ->
-                        scope.launch { citaRepositorio.confirmar(citaId) }
-                    },
-                    onCancelar = { citaId ->
-                        scope.launch { citaRepositorio.cancelar(citaId) }
                     },
                 )
             }
@@ -224,35 +215,6 @@ private fun TurnoFacilAppContent(
                     navArgument(Destino.DetalleCita.ARG_CITA_ID) { type = NavType.StringType },
                 ),
             ) { entry ->
-                val citaId = entry.arguments?.getString(Destino.DetalleCita.ARG_CITA_ID)
-                val cita by remember(citaId, citaRepositorio) {
-                    citaId?.let { citaRepositorio.observarCita(it) } ?: flowOf(null)
-                }.collectAsStateWithLifecycle(initialValue = null)
-                val servicio = cita?.servicioId?.let { id ->
-                    serviciosUiState.servicios.firstOrNull { it.id == id }
-                }
-
-                DetalleCitaScreen(
-                    cita = cita,
-                    servicio = servicio,
-                    onVolver = { navController.popBackStack() },
-                    onConfirmar = {
-                        if (citaId != null) {
-                            scope.launch {
-                                citaRepositorio.confirmar(citaId)
-                                navController.popBackStack()
-                            }
-                        }
-                    },
-                    onReprogramar = { navController.navigate(Destino.Agendar.crearRuta()) },
-                    onCancelar = {
-                        if (citaId != null) {
-                            scope.launch {
-                                citaRepositorio.cancelar(citaId)
-                                navController.popBackStack()
-                            }
-                        }
-                    },
                 val citaId = entry.arguments?.getString(Destino.DetalleCita.ARG_CITA_ID) ?: ""
                 val viewModel = remember(citaId) { DetailViewModel(citaId = citaId) }
                 DetailScreen(
@@ -263,20 +225,6 @@ private fun TurnoFacilAppContent(
             }
 
             composable(Destino.AdminServicios.ruta) {
-                val serviciosAdmin by remember(servicioRepositorio) {
-                    servicioRepositorio.observarTodosServicios()
-                }.collectAsStateWithLifecycle(initialValue = emptyList())
-
-                AdminServiciosScreen(
-                    servicios = serviciosAdmin,
-                    onGuardar = { servicio ->
-                        scope.launch { servicioRepositorio.guardarServicio(servicio) }
-                    },
-                    onEliminar = { servicio ->
-                        scope.launch { servicioRepositorio.eliminarServicio(servicio.id) }
-                    },
-                    onVolver = { navController.popBackStack() },
-                )
                 ServiceAdminScreen(onVolver = { navController.popBackStack() })
             }
 

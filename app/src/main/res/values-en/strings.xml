@@ -114,12 +114,6 @@
     <!-- Service Management (prefix admin_) -->
     <string name="admin_titulo">Service Management</string>
     <string name="admin_subtitulo">Create, edit and delete services</string>
-    <string name="admin_nuevo_servicio">New service</string>
-    <string name="admin_editar_servicio">Edit service</string>
-    <string name="admin_nombre">Name</string>
-    <string name="admin_precio">Price</string>
-    <string name="admin_duracion">Duration (min)</string>
-    <string name="admin_disponible">Available</string>
     <string name="admin_inactivo">Inactive</string>
     <string name="admin_nuevo_servicio">New Service</string>
     <string name="admin_editar_servicio">Edit Service</string>
