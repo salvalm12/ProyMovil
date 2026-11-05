@@ -85,6 +85,7 @@ class DetailViewModel(
         _uiState.update { it.copy(mostrarDialogoReprogramar = false) }
     }
 
+
     fun reprogramarCita(nuevaFecha: String, nuevaHora: String) {
         viewModelScope.launch {
             val resultado = appointmentRepository.reprogramarCita(citaId, nuevaFecha, nuevaHora)
