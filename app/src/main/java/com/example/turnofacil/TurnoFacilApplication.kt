@@ -1,9 +1,3 @@
 package com.example.turnofacil
 
-import android.app.Application
-import com.example.turnofacil.data.AppContainer
-
-class TurnoFacilApplication : Application() {
-
-    val container: AppContainer by lazy { AppContainer(this) }
-}
+typealias TurnoFacilApplication = com.example.turnofacil.app.TurnoFacilApplication
