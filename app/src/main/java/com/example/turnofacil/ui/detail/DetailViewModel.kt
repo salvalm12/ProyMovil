@@ -98,6 +98,7 @@ class DetailViewModel(
         }
     }
 
+
     fun limpiarMensajes() {
         _uiState.update { it.copy(error = null, mensajeExito = null) }
     }
