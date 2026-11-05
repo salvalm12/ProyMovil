@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
  * ViewModel para la pantalla de Detalle de Cita (RF5).
  * Permite confirmar, reprogramar y cancelar citas.
  */
+
 class DetailViewModel(
     private val citaId: String,
     private val appointmentRepository: AppointmentRepository = DefaultAppContainer().appointmentRepository,
