@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,7 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.turnofacil.data.demo.DatosDemo
+import com.example.turnofacil.data.repository.RoomSeeder
 import com.example.turnofacil.navigation.Destino
 import com.example.turnofacil.navigation.DestinoPrincipal
 import com.example.turnofacil.ui.screens.AdminServiciosScreen
@@ -41,21 +43,50 @@ import com.example.turnofacil.ui.viewmodel.CitaRepositorioDemo
 import com.example.turnofacil.ui.viewmodel.ServicioRepositorio
 import com.example.turnofacil.ui.viewmodel.ServicioRepositorioDemo
 import com.example.turnofacil.ui.viewmodel.ServiciosViewModel
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 
 /**
- * Contenedor principal de la aplicación. Define el menú de navegación adaptable
- * (NavigationBar, NavigationRail o NavigationDrawer según el tamaño de pantalla)
- * y el grafo de navegación entre todas las pantallas.
+ * Punto de entrada de la UI.
+ *
+ * En la app real usa el contenedor de Room; en previews cae a los repositorios
+ * demo para que el editor de Compose pueda renderizar sin una base de datos.
  */
 @PreviewScreenSizes
 @Composable
 fun TurnoFacilApp() {
+    val context = LocalContext.current
+    val application = context.applicationContext as? TurnoFacilApplication
+
+    if (application != null) {
+        TurnoFacilAppContent(
+            servicioRepositorio = application.container.servicioRepositorio,
+            citaRepositorio = application.container.citaRepositorio,
+            roomSeeder = application.container.roomSeeder,
+        )
+    } else {
+        TurnoFacilAppContent(
+            servicioRepositorio = remember { ServicioRepositorioDemo() },
+            citaRepositorio = remember { CitaRepositorioDemo() },
+            roomSeeder = null,
+        )
+    }
+}
+
+@Composable
+private fun TurnoFacilAppContent(
+    servicioRepositorio: ServicioRepositorio,
+    citaRepositorio: CitaRepositorio,
+    roomSeeder: RoomSeeder?,
+) {
+    LaunchedEffect(roomSeeder) {
+        roomSeeder?.seedIfEmpty()
+    }
+
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destinoActual = backStackEntry?.destination
-
-    val servicioRepositorio: ServicioRepositorio = remember { ServicioRepositorioDemo() }
-    val citaRepositorio: CitaRepositorio = remember { CitaRepositorioDemo() }
 
     val serviciosViewModel: ServiciosViewModel = viewModel(
         factory = viewModelFactory {
@@ -64,6 +95,10 @@ fun TurnoFacilApp() {
             }
         }
     )
+    val serviciosUiState by serviciosViewModel.uiState.collectAsStateWithLifecycle()
+    val citas by remember(citaRepositorio) {
+        citaRepositorio.observarCitas("Hoy")
+    }.collectAsStateWithLifecycle(initialValue = emptyList())
 
     val navegarPrincipal: (Destino) -> Unit = { destino ->
         val ruta = if (destino is Destino.Agendar) Destino.Agendar.crearRuta() else destino.ruta
@@ -108,6 +143,8 @@ fun TurnoFacilApp() {
         ) {
             composable(Destino.Inicio.ruta) {
                 InicioScreen(
+                    citasHoy = citas.size,
+                    serviciosActivos = serviciosUiState.servicios.size,
                     onVerServicios = { navegarPrincipal(Destino.Servicios) },
                     onAgendar = { navegarPrincipal(Destino.Agendar) },
                     onVerAgenda = { navegarPrincipal(Destino.Agenda) },
@@ -116,7 +153,6 @@ fun TurnoFacilApp() {
             }
 
             composable(Destino.Servicios.ruta) {
-                val serviciosUiState by serviciosViewModel.uiState.collectAsStateWithLifecycle()
                 ServiciosScreen(
                     uiState = serviciosUiState,
                     onAgendar = { servicioId ->
@@ -168,9 +204,16 @@ fun TurnoFacilApp() {
 
             composable(Destino.Agenda.ruta) {
                 AgendaDelDiaScreen(
-                    citas = DatosDemo.citas,
+                    citas = citas,
+                    servicios = serviciosUiState.servicios,
                     onVerDetalle = { citaId ->
                         navController.navigate(Destino.DetalleCita.crearRuta(citaId))
+                    },
+                    onConfirmar = { citaId ->
+                        scope.launch { citaRepositorio.confirmar(citaId) }
+                    },
+                    onCancelar = { citaId ->
+                        scope.launch { citaRepositorio.cancelar(citaId) }
                     },
                 )
             }
@@ -182,17 +225,52 @@ fun TurnoFacilApp() {
                 ),
             ) { entry ->
                 val citaId = entry.arguments?.getString(Destino.DetalleCita.ARG_CITA_ID)
+                val cita by remember(citaId, citaRepositorio) {
+                    citaId?.let { citaRepositorio.observarCita(it) } ?: flowOf(null)
+                }.collectAsStateWithLifecycle(initialValue = null)
+                val servicio = cita?.servicioId?.let { id ->
+                    serviciosUiState.servicios.firstOrNull { it.id == id }
+                }
+
                 DetalleCitaScreen(
-                    cita = citaId?.let { DatosDemo.citaPorId(it) },
+                    cita = cita,
+                    servicio = servicio,
                     onVolver = { navController.popBackStack() },
-                    onConfirmar = { navController.popBackStack() },
+                    onConfirmar = {
+                        if (citaId != null) {
+                            scope.launch {
+                                citaRepositorio.confirmar(citaId)
+                                navController.popBackStack()
+                            }
+                        }
+                    },
                     onReprogramar = { navController.navigate(Destino.Agendar.crearRuta()) },
-                    onCancelar = { navController.popBackStack() },
+                    onCancelar = {
+                        if (citaId != null) {
+                            scope.launch {
+                                citaRepositorio.cancelar(citaId)
+                                navController.popBackStack()
+                            }
+                        }
+                    },
                 )
             }
 
             composable(Destino.AdminServicios.ruta) {
-                AdminServiciosScreen(onVolver = { navController.popBackStack() })
+                val serviciosAdmin by remember(servicioRepositorio) {
+                    servicioRepositorio.observarTodosServicios()
+                }.collectAsStateWithLifecycle(initialValue = emptyList())
+
+                AdminServiciosScreen(
+                    servicios = serviciosAdmin,
+                    onGuardar = { servicio ->
+                        scope.launch { servicioRepositorio.guardarServicio(servicio) }
+                    },
+                    onEliminar = { servicio ->
+                        scope.launch { servicioRepositorio.eliminarServicio(servicio.id) }
+                    },
+                    onVolver = { navController.popBackStack() },
+                )
             }
 
             composable(Destino.Configuracion.ruta) {

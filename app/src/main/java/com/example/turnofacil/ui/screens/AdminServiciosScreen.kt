@@ -25,7 +25,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.turnofacil.R
-import com.example.turnofacil.data.demo.DatosDemo
 import com.example.turnofacil.data.model.Servicio
 import com.example.turnofacil.ui.components.formatearPrecio
 import java.util.UUID
@@ -44,12 +42,12 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminServiciosScreen(
+    servicios: List<Servicio>,
+    onGuardar: (Servicio) -> Unit,
+    onEliminar: (Servicio) -> Unit,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val servicios = remember {
-        mutableStateListOf<Servicio>().apply { addAll(DatosDemo.servicios) }
-    }
     var mostrarDialogo by remember { mutableStateOf(false) }
     var servicioEditando by remember { mutableStateOf<Servicio?>(null) }
 
@@ -105,6 +103,11 @@ fun AdminServiciosScreen(
                             )
                         },
                         supportingContent = {
+                            val estado = if (servicio.activo) {
+                                ""
+                            } else {
+                                " · " + stringResource(R.string.admin_inactivo)
+                            }
                             Text(
                                 text = stringResource(
                                     R.string.precio_formato,
@@ -112,7 +115,7 @@ fun AdminServiciosScreen(
                                 ) + " · " + stringResource(
                                     R.string.servicios_duracion,
                                     servicio.duracionMin,
-                                ),
+                                ) + estado,
                             )
                         },
                         trailingContent = {
@@ -128,7 +131,7 @@ fun AdminServiciosScreen(
                                         contentDescription = stringResource(R.string.accion_editar),
                                     )
                                 }
-                                IconButton(onClick = { servicios.remove(servicio) }) {
+                                IconButton(onClick = { onEliminar(servicio) }) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_delete),
                                         contentDescription = stringResource(R.string.accion_eliminar),
@@ -147,12 +150,7 @@ fun AdminServiciosScreen(
             servicio = servicioEditando,
             onDismiss = { mostrarDialogo = false },
             onGuardar = { servicio ->
-                val indice = servicios.indexOfFirst { it.id == servicio.id }
-                if (indice >= 0) {
-                    servicios[indice] = servicio
-                } else {
-                    servicios.add(servicio)
-                }
+                onGuardar(servicio)
                 mostrarDialogo = false
             },
         )

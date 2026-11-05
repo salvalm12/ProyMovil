@@ -26,15 +26,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.turnofacil.R
-import com.example.turnofacil.data.demo.DatosDemo
 import com.example.turnofacil.data.model.Cita
+import com.example.turnofacil.data.model.Servicio
 import com.example.turnofacil.ui.components.EtiquetaEstado
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgendaDelDiaScreen(
     citas: List<Cita>,
+    servicios: List<Servicio>,
     onVerDetalle: (String) -> Unit,
+    onConfirmar: (String) -> Unit,
+    onCancelar: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -65,7 +68,13 @@ fun AgendaDelDiaScreen(
                     )
                 }
                 items(citas, key = { it.id }) { cita ->
-                    TarjetaCita(cita = cita, onVerDetalle = onVerDetalle)
+                    TarjetaCita(
+                        cita = cita,
+                        servicio = servicios.firstOrNull { it.id == cita.servicioId },
+                        onVerDetalle = onVerDetalle,
+                        onConfirmar = onConfirmar,
+                        onCancelar = onCancelar,
+                    )
                 }
             }
         }
@@ -75,10 +84,12 @@ fun AgendaDelDiaScreen(
 @Composable
 private fun TarjetaCita(
     cita: Cita,
+    servicio: Servicio?,
     onVerDetalle: (String) -> Unit,
+    onConfirmar: (String) -> Unit,
+    onCancelar: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val servicio = DatosDemo.servicioPorId(cita.servicioId)
     val tipoTexto = stringResource(cita.tipoAtencion.etiqueta)
 
     Card(modifier = modifier.fillMaxWidth()) {
@@ -112,10 +123,10 @@ private fun TarjetaCita(
                 TextButton(onClick = { onVerDetalle(cita.id) }) {
                     Text(stringResource(R.string.agenda_ver_detalle))
                 }
-                TextButton(onClick = { }) {
+                TextButton(onClick = { onConfirmar(cita.id) }) {
                     Text(stringResource(R.string.accion_confirmar))
                 }
-                TextButton(onClick = { }) {
+                TextButton(onClick = { onCancelar(cita.id) }) {
                     Text(
                         text = stringResource(R.string.accion_cancelar),
                         color = MaterialTheme.colorScheme.error,

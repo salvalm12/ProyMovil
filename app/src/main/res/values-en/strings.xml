@@ -93,6 +93,7 @@
     <string name="admin_precio">Price</string>
     <string name="admin_duracion">Duration (min)</string>
     <string name="admin_disponible">Available</string>
+    <string name="admin_inactivo">Inactive</string>
 
     <!-- Settings -->
     <string name="config_titulo">Settings</string>

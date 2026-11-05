@@ -19,6 +19,15 @@ object DatosDemo {
         Servicio("s5", "Tratamiento capilar", 250.0, 40),
     )
 
+    data class AdicionalDemo(val nombre: String, val precio: Double)
+
+    val adicionales: List<AdicionalDemo> = listOf(
+        AdicionalDemo("Lavado", 50.0),
+        AdicionalDemo("Diseño de ceja", 60.0),
+        AdicionalDemo("Tratamiento", 100.0),
+        AdicionalDemo("Barba", 80.0),
+    )
+
     val citas: List<Cita> = listOf(
         Cita(
             id = "c1",
@@ -69,10 +78,6 @@ object DatosDemo {
     fun citaPorId(id: String): Cita? = citas.firstOrNull { it.id == id }
 
     /** Servicios adicionales que se pueden marcar con Checkbox al agendar. */
-    val serviciosAdicionales: List<String> = listOf(
-        "Lavado",
-        "Diseño de ceja",
-        "Tratamiento",
-        "Barba",
-    )
+    val serviciosAdicionales: List<String>
+        get() = adicionales.map { it.nombre }
 }
